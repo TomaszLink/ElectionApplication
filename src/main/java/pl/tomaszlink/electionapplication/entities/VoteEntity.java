@@ -1,6 +1,7 @@
 package pl.tomaszlink.electionapplication.entities;
 
 import jakarta.persistence.*;
+import pl.tomaszlink.electionapplication.voters.entities.VoterEntity;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

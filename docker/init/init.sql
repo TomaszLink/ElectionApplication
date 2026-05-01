@@ -5,8 +5,9 @@ CREATE TABLE voters (
 
                         first_name VARCHAR(100) NOT NULL,
                         last_name VARCHAR(100) NOT NULL,
+                        searchable VARCHAR(201) GENERATED ALWAYS AS (lower(first_name || ' ' || last_name)) STORED,
 
-                        pesel CHAR(11) NOT NULL UNIQUE,
+                        pesel VARCHAR(11) NOT NULL,
                         birth_date DATE NOT NULL,
 
                         blocked BOOLEAN NOT NULL DEFAULT FALSE,
@@ -16,6 +17,8 @@ CREATE TABLE voters (
 
                         CONSTRAINT voters_pesel_format_chk
                             CHECK (pesel ~ '^[0-9]{11}$'),
+
+                        CONSTRAINT uk_voters_pesel UNIQUE (pesel),
 
     CONSTRAINT voters_first_name_length_chk
         CHECK (length(trim(first_name)) >= 2),

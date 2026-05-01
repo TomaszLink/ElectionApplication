@@ -1,4 +1,4 @@
-package pl.tomaszlink.electionapplication.entities;
+package pl.tomaszlink.electionapplication.voters.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -21,6 +21,9 @@ public class VoterEntity {
 
     @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
+
+    @Column(name = "searchable", insertable = false, updatable = false)
+    private String searchable;
 
     @Column(name = "pesel", nullable = false, unique = true, length = 11)
     private String pesel;
