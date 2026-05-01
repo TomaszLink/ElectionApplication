@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import pl.tomaszlink.electionapplication.voters.entities.VoterEntity;
 import pl.tomaszlink.electionapplication.voters.exceptions.VoterAlreadyExistsException;
 import pl.tomaszlink.electionapplication.voters.exceptions.VoterNotFoundException;
+import pl.tomaszlink.electionapplication.voters.helpers.VoterSpecificationHelper;
 import pl.tomaszlink.electionapplication.voters.models.UpdateVoterCommand;
 import pl.tomaszlink.electionapplication.voters.properties.ConstraintsProperties;
 import pl.tomaszlink.electionapplication.voters.repositories.VoterRepository;
@@ -33,8 +34,8 @@ public class VoterManager {
         PageRequest pageRequest = PageRequest.of(page, size, createSort(sortBy, sortDirection));
 
         Specification<VoterEntity> specification = Specification
-                .where(searchByName(search))
-                .and(filterByBlocked(blockedFilter));
+                .where(VoterSpecificationHelper.searchByName(search))
+                .and(VoterSpecificationHelper.filterByBlocked(blockedFilter));
         return this.voterRepository.findAll(specification, pageRequest);
     }
 
@@ -73,33 +74,6 @@ public class VoterManager {
                 sortBy;
 
         return Sort.by(direction, property);
-    }
-
-    private Specification<VoterEntity> searchByName(String search) {
-        return (root, query, criteriaBuilder) -> {
-            if (search == null || search.isBlank()) {
-                return criteriaBuilder.conjunction();
-            }
-
-            String normalizedSearch = "%" + search.trim().toLowerCase() + "%";
-            return criteriaBuilder.like(
-                    root.get("searchable"),
-                    normalizedSearch
-            );
-        };
-    }
-
-    private Specification<VoterEntity> filterByBlocked(Boolean blockedFilter){
-        return (root, query, criteriaBuilder) -> {
-            if (blockedFilter == null) {
-                return criteriaBuilder.conjunction();
-            }
-
-            return criteriaBuilder.equal(
-                    root.get("blocked"),
-                    blockedFilter
-            );
-        };
     }
 
     private VoterEntity saveWithPeselUniqueCheck(@NotNull VoterEntity voterEntity){

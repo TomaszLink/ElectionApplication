@@ -44,9 +44,13 @@ CREATE TABLE elections (
 
                            name VARCHAR(200) NOT NULL,
                            description VARCHAR(1000),
+                           searchable VARCHAR(200) GENERATED ALWAYS AS (lower(name)) STORED,
+
 
                            start_date TIMESTAMPTZ NOT NULL,
                            end_date TIMESTAMPTZ NOT NULL,
+
+                            options_size INTEGER NOT NULL DEFAULT 0,
 
                            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
                            updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -79,9 +83,6 @@ CREATE TABLE election_options (
 
                                   CONSTRAINT election_options_name_length_chk
                                       CHECK (length(trim(name)) >= 2),
-
-                                  CONSTRAINT election_options_unique_name_per_election
-                                      UNIQUE (election_id, name),
 
                                   CONSTRAINT election_options_unique_election_id_id
                                       UNIQUE (election_id, id)

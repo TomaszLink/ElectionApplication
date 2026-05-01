@@ -1,11 +1,14 @@
 package pl.tomaszlink.electionapplication.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "election_options")
+@Getter
 public class ElectionOptionEntity {
 
     @Id
@@ -34,13 +37,15 @@ public class ElectionOptionEntity {
     protected ElectionOptionEntity() {
     }
 
-    private ElectionOptionEntity(String name, String description) {
+    private ElectionOptionEntity(String name, String description, ElectionEntity electionEntity) {
         this.name = name;
         this.description = description;
+        this.election = electionEntity;
+        electionEntity.addOption(this);
     }
 
-    public static ElectionOptionEntity create(String name, String description) {
-        return new ElectionOptionEntity(name, description);
+    public static ElectionOptionEntity create(String name, String description, ElectionEntity electionEntity) {
+        return new ElectionOptionEntity(name, description, electionEntity);
     }
 
     public void update(String name, String description){
