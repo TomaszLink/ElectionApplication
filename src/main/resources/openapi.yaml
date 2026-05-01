@@ -1,0 +1,38 @@
+openapi: 3.0.3
+info:
+  title: Election Application API
+  description: API for election system.
+  version: 1.0.0
+
+paths:
+  /api/v1/test:
+    get:
+      tags:
+        - test
+      operationId: registerUser
+      responses:
+        '200':
+          description: "test"
+
+components:
+  schemas:
+    ErrorModel:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "BAD_REQUEST"
+        message:
+          type: string
+          example: "Request has wrong field"
+      required:
+        - error
+        - message
+
+  responses:
+    ErrorResponse:
+      description: "Error response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorModel"
