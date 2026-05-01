@@ -1,8 +1,8 @@
 package pl.tomaszlink.electionapplication.elections.converters;
 
 import jakarta.validation.constraints.NotNull;
-import pl.tomaszlink.electionapplication.entities.ElectionEntity;
-import pl.tomaszlink.electionapplication.entities.ElectionOptionEntity;
+import pl.tomaszlink.electionapplication.elections.entities.ElectionEntity;
+import pl.tomaszlink.electionapplication.elections.entities.ElectionOptionEntity;
 import pl.tomaszlink.electionapplication.model.ElectionListItemResponse;
 import pl.tomaszlink.electionapplication.model.ElectionOptionResponse;
 import pl.tomaszlink.electionapplication.model.ElectionResponse;

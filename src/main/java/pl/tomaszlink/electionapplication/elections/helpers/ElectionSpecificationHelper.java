@@ -1,7 +1,7 @@
 package pl.tomaszlink.electionapplication.elections.helpers;
 
 import org.springframework.data.jpa.domain.Specification;
-import pl.tomaszlink.electionapplication.entities.ElectionEntity;
+import pl.tomaszlink.electionapplication.elections.entities.ElectionEntity;
 import pl.tomaszlink.electionapplication.model.ElectionStatus;
 
 import java.time.OffsetDateTime;

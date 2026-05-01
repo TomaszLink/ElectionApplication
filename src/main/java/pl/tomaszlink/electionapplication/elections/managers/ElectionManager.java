@@ -1,5 +1,6 @@
 package pl.tomaszlink.electionapplication.elections.managers;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,7 +14,7 @@ import pl.tomaszlink.electionapplication.elections.helpers.ElectionSpecification
 import pl.tomaszlink.electionapplication.elections.models.ElectionOptionUpdateCommand;
 import pl.tomaszlink.electionapplication.elections.models.ElectionUpdateCommand;
 import pl.tomaszlink.electionapplication.elections.repositories.ElectionRepository;
-import pl.tomaszlink.electionapplication.entities.ElectionEntity;
+import pl.tomaszlink.electionapplication.elections.entities.ElectionEntity;
 import pl.tomaszlink.electionapplication.model.ElectionStatus;
 
 import java.time.OffsetDateTime;
@@ -28,6 +29,7 @@ public class ElectionManager {
     private static final String DEFAULT_SORT_BY = "name";
     private static final Sort.Direction DEFAULT_SORT_DIRECTION = Sort.Direction.ASC;
 
+    @Transactional
     public ElectionEntity saveNewElection(@NotNull ElectionEntity electionEntity){
         return this.electionRepository.save(electionEntity);
     }
@@ -47,6 +49,7 @@ public class ElectionManager {
         return this.electionRepository.findAll(specification, pageRequest);
     }
 
+    @Transactional
     public ElectionEntity updateElection(@NotNull UUID id, @NotNull ElectionUpdateCommand electionUpdateCommand, List<ElectionOptionUpdateCommand> electionOptionUpdateCommands){
         ElectionEntity electionEntity = this.findById(id);
 
@@ -62,6 +65,8 @@ public class ElectionManager {
         );
 
         electionEntity.update(electionOptionUpdateCommands);
+
+        electionEntity.markAsChanged();
 
         return this.electionRepository.save(electionEntity);
     }

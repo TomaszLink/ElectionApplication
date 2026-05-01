@@ -1,4 +1,4 @@
-package pl.tomaszlink.electionapplication.entities;
+package pl.tomaszlink.electionapplication.elections.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -48,6 +48,10 @@ public class ElectionEntity {
 
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
 
     protected ElectionEntity() {
     }
@@ -114,8 +118,11 @@ public class ElectionEntity {
         }
     }
 
-
     public void addOption(@NotNull ElectionOptionEntity option) {
         this.options.add(option);
+    }
+
+    public void markAsChanged() {
+        this.updatedAt = OffsetDateTime.now();
     }
 }

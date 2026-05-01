@@ -8,8 +8,8 @@ import pl.tomaszlink.electionapplication.elections.converters.ElectionConverter;
 import pl.tomaszlink.electionapplication.elections.managers.ElectionManager;
 import pl.tomaszlink.electionapplication.elections.models.ElectionOptionUpdateCommand;
 import pl.tomaszlink.electionapplication.elections.models.ElectionUpdateCommand;
-import pl.tomaszlink.electionapplication.entities.ElectionEntity;
-import pl.tomaszlink.electionapplication.entities.ElectionOptionEntity;
+import pl.tomaszlink.electionapplication.elections.entities.ElectionEntity;
+import pl.tomaszlink.electionapplication.elections.entities.ElectionOptionEntity;
 import pl.tomaszlink.electionapplication.model.*;
 
 import java.util.List;

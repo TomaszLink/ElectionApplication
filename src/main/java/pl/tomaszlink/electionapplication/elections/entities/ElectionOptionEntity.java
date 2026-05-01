@@ -1,4 +1,4 @@
-package pl.tomaszlink.electionapplication.entities;
+package pl.tomaszlink.electionapplication.elections.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;

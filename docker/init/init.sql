@@ -15,6 +15,8 @@ CREATE TABLE voters (
                         created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
                         updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
+                        version bigint NOT NULL DEFAULT 0,
+
                         CONSTRAINT voters_pesel_format_chk
                             CHECK (pesel ~ '^[0-9]{11}$'),
 
@@ -50,10 +52,11 @@ CREATE TABLE elections (
                            start_date TIMESTAMPTZ NOT NULL,
                            end_date TIMESTAMPTZ NOT NULL,
 
-                            options_size INTEGER NOT NULL DEFAULT 0,
+                           options_size INTEGER NOT NULL DEFAULT 0,
 
                            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
                            updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+                           version bigint NOT NULL DEFAULT 0,
 
                            CONSTRAINT elections_name_length_chk
                                CHECK (length(trim(name)) >= 3),
