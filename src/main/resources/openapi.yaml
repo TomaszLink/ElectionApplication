@@ -5,34 +5,1023 @@ info:
   version: 1.0.0
 
 paths:
-  /api/v1/test:
+  /api/v1/voters:
+    post:
+      tags:
+        - Voters
+      summary: Register new voter
+      description: Creates a new voter. Birth date is derived from PESEL. Voter must be at least 18 years old.
+      operationId: registerVoter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterVoterRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/VoterResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '409':
+          $ref: '#/components/responses/VoterAlreadyExistsErrorResponse'
+        '422':
+          $ref: '#/components/responses/VoterTooYoungErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
     get:
       tags:
-        - test
-      operationId: registerUser
+        - Voters
+      summary: Get voters
+      description: >
+        Returns paginated list of voters. 
+        Allows filtering by first name or last name using at least 3 characters.
+        Allows sorting by last name or birth date.
+      operationId: getVoters
+      parameters:
+        - name: page
+          in: query
+          required: true
+          description: Page number, starting from 0.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            example: 0
+        - name: size
+          in: query
+          required: true
+          description: Number of elements per page.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+            example: 20
+        - name: search
+          in: query
+          required: false
+          description: >
+            Search phrase used to filter voters by first name or last name.
+            Must contain at least 3 characters.
+          schema:
+            type: string
+            minLength: 3
+            example: Kow
+        - name: blockedFilter
+          in: query
+          required: false
+          description: Filter voters by blocked status.
+          schema:
+            type: boolean
+            example: false
+        - name: sortBy
+          in: query
+          required: false
+          description: Field used for sorting.
+          schema:
+            type: string
+            enum:
+              - lastName
+              - birthDate
+            default: lastName
+            example: lastName
+        - name: sortDirection
+          in: query
+          required: false
+          description: Sort direction.
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: asc
+            example: asc
       responses:
         '200':
-          description: "test"
+          $ref: '#/components/responses/VotersListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /api/v1/voters/{id}:
+    get:
+      tags:
+        - Voters
+      summary: Get specific voter
+      description: Returns details of a specific voter by voter ID.
+      operationId: getVoter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Voter technical identifier.
+          schema:
+            type: string
+            format: uuid
+            example: "0f7f3f6e-6d4c-4f31-9c4b-41e7087fbb21"
+      responses:
+        '200':
+          $ref: '#/components/responses/VoterResponse'
+        '404':
+          $ref: '#/components/responses/VoterNotFoundErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+    put:
+      tags:
+        - Voters
+      summary: Update voter
+      description: >
+        Updates voter's first name, last name and PESEL.
+        Birth date is recalculated from PESEL.
+        Voter must still be at least 18 years old.
+      operationId: updateVoter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Voter technical identifier.
+          schema:
+            type: string
+            format: uuid
+            example: "0f7f3f6e-6d4c-4f31-9c4b-41e7087fbb21"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVoterRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/VoterResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '404':
+          $ref: '#/components/responses/VoterNotFoundErrorResponse'
+        '409':
+          $ref: '#/components/responses/VoterAlreadyExistsErrorResponse'
+        '422':
+          $ref: '#/components/responses/VoterTooYoungErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /api/v1/voters/{id}/block-status:
+    patch:
+      tags:
+        - Voters
+      summary: Update voter block status
+      description: Blocks or unblocks voter.
+      operationId: updateVoterBlockStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Voter technical identifier.
+          schema:
+            type: string
+            format: uuid
+            example: "0f7f3f6e-6d4c-4f31-9c4b-41e7087fbb21"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVoterBlockStatusRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/VoterResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '404':
+          $ref: '#/components/responses/VoterNotFoundErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /api/v1/elections:
+    post:
+      tags:
+        - Elections
+      summary: Create election
+      description: Creates a new election with voting options.
+      operationId: createElection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateElectionRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/ElectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    get:
+      tags:
+        - Elections
+      summary: Get elections
+      description: >
+        Returns paginated list of elections.
+        Allows filtering by election name using at least 3 characters.
+        Allows sorting by name, start date and end date.
+      operationId: getElections
+      parameters:
+        - name: page
+          in: query
+          required: true
+          description: Page number, starting from 0.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            example: 0
+        - name: size
+          in: query
+          required: true
+          description: Number of elements per page.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+            example: 20
+        - name: search
+          in: query
+          required: false
+          description: >
+            Search phrase used to filter elections by name.
+            Must contain at least 3 characters.
+          schema:
+            type: string
+            minLength: 3
+            example: Wój
+        - name: status
+          in: query
+          required: false
+          description: Filter elections by status.
+          schema:
+            $ref: '#/components/schemas/ElectionStatus'
+        - name: sortBy
+          in: query
+          required: false
+          description: Field used for sorting.
+          schema:
+            type: string
+            enum:
+              - name
+              - startDate
+              - endDate
+            default: startDate
+            example: startDate
+        - name: sortDirection
+          in: query
+          required: false
+          description: Sort direction.
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+            example: desc
+      responses:
+        '200':
+          $ref: '#/components/responses/ElectionsListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /api/v1/elections/{id}:
+    get:
+      tags:
+        - Elections
+      summary: Get specific election
+      description: Returns details of a specific election with voting options.
+      operationId: getElection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Election technical identifier.
+          schema:
+            type: string
+            format: uuid
+            example: "7a9737df-bb71-4a6f-8b3c-75f8e761fd32"
+      responses:
+        '200':
+          $ref: '#/components/responses/ElectionResponse'
+        '404':
+          $ref: '#/components/responses/ElectionNotFoundErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+    put:
+      tags:
+        - Elections
+      summary: Update election
+      description: >
+        Updates election data and replaces its voting options.
+        Election can be modified only before voting starts.
+      operationId: updateElection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Election technical identifier.
+          schema:
+            type: string
+            format: uuid
+            example: "7a9737df-bb71-4a6f-8b3c-75f8e761fd32"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateElectionRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/ElectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '404':
+          $ref: '#/components/responses/ElectionNotFoundErrorResponse'
+        '422':
+          $ref: '#/components/responses/ElectionAlreadyStartedErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /api/v1/elections/{id}/votes:
+    post:
+      tags:
+        - Votes
+      summary: Voting
+      description: Allows voter to vote in a specific election.
+      operationId: vote
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Election technical identifier.
+          schema:
+            type: string
+            format: uuid
+            example: "7a9737df-bb71-4a6f-8b3c-75f8e761fd32"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoteRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/VoteResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '404':
+          $ref: '#/components/responses/VoteResourceNotFoundErrorResponse'
+        '409':
+          $ref: '#/components/responses/VoteAlreadyExistsErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
 components:
   schemas:
+    RegisterVoterRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - pesel
+      properties:
+        firstName:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: Jan
+        lastName:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: Kowalski
+        pesel:
+          type: string
+          pattern: '^[0-9]{11}$'
+          minLength: 11
+          maxLength: 11
+          example: "95010112345"
+
+    UpdateVoterRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - pesel
+      properties:
+        firstName:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: Jan
+        lastName:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: Kowalski
+        pesel:
+          type: string
+          pattern: '^[0-9]{11}$'
+          minLength: 11
+          maxLength: 11
+          example: "95010112345"
+
+    VoterResponse:
+      type: object
+      required:
+        - id
+        - firstName
+        - lastName
+        - pesel
+        - birthDate
+        - blocked
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "0f7f3f6e-6d4c-4f31-9c4b-41e7087fbb21"
+        firstName:
+          type: string
+          example: Jan
+        lastName:
+          type: string
+          example: Kowalski
+        pesel:
+          type: string
+          example: "95010112345"
+        birthDate:
+          type: string
+          format: date
+          description: Birth date derived from PESEL.
+          example: "1995-01-01"
+        blocked:
+          type: boolean
+          example: false
+
+    VoterListItemResponse:
+      type: object
+      required:
+        - id
+        - firstName
+        - lastName
+        - birthDate
+        - blocked
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "0f7f3f6e-6d4c-4f31-9c4b-41e7087fbb21"
+        firstName:
+          type: string
+          example: Jan
+        lastName:
+          type: string
+          example: Kowalski
+        birthDate:
+          type: string
+          format: date
+          example: "1995-01-01"
+        blocked:
+          type: boolean
+          example: false
+
+    UpdateVoterBlockStatusRequest:
+      type: object
+      required:
+        - blocked
+      properties:
+        blocked:
+          type: boolean
+          description: Indicates whether voter should be blocked.
+          example: true
+
+    ElectionStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - FINISHED
+      example: ACTIVE
+
+    CreateElectionRequest:
+      type: object
+      required:
+        - name
+        - startDate
+        - endDate
+        - options
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 200
+          example: Wybory na Wójta w 2025
+        description:
+          type: string
+          maxLength: 1000
+          example: Wybory lokalne na stanowisko wójta.
+        startDate:
+          type: string
+          format: date-time
+          example: "2025-10-01T08:00:00Z"
+        endDate:
+          type: string
+          format: date-time
+          example: "2025-10-01T20:00:00Z"
+        options:
+          type: array
+          minItems: 2
+          items:
+            $ref: '#/components/schemas/CreateElectionOptionRequest'
+
+    UpdateElectionRequest:
+      type: object
+      required:
+        - name
+        - startDate
+        - endDate
+        - options
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 200
+          example: Wybory na Wójta w 2025
+        description:
+          type: string
+          maxLength: 1000
+          example: Wybory lokalne na stanowisko wójta.
+        startDate:
+          type: string
+          format: date-time
+          example: "2025-10-01T08:00:00Z"
+        endDate:
+          type: string
+          format: date-time
+          example: "2025-10-01T20:00:00Z"
+        options:
+          type: array
+          minItems: 2
+          items:
+            $ref: '#/components/schemas/UpdateElectionOptionRequest'
+
+    CreateElectionOptionRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 200
+          example: Jan Kowalski
+        description:
+          type: string
+          maxLength: 1000
+          example: Kandydat niezależny.
+
+    UpdateElectionOptionRequest:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Existing option ID. If not provided, a new option may be created.
+          example: "7ed9c6f5-85ef-4677-beb5-3c31cc91c205"
+        name:
+          type: string
+          minLength: 2
+          maxLength: 200
+          example: Jan Kowalski
+        description:
+          type: string
+          maxLength: 1000
+          example: Kandydat niezależny.
+
+    ElectionResponse:
+      type: object
+      required:
+        - id
+        - name
+        - startDate
+        - endDate
+        - status
+        - options
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "7a9737df-bb71-4a6f-8b3c-75f8e761fd32"
+        name:
+          type: string
+          example: Wybory na Wójta w 2025
+        description:
+          type: string
+          example: Wybory lokalne na stanowisko wójta.
+        startDate:
+          type: string
+          format: date-time
+          example: "2025-10-01T08:00:00Z"
+        endDate:
+          type: string
+          format: date-time
+          example: "2025-10-01T20:00:00Z"
+        status:
+          $ref: '#/components/schemas/ElectionStatus'
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/ElectionOptionResponse'
+        results:
+          $ref: '#/components/schemas/ElectionResultsSummaryResponse'
+
+    ElectionListItemResponse:
+      type: object
+      required:
+        - id
+        - name
+        - startDate
+        - endDate
+        - status
+        - optionsCount
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "7a9737df-bb71-4a6f-8b3c-75f8e761fd32"
+        name:
+          type: string
+          example: Wybory na Wójta w 2025
+        startDate:
+          type: string
+          format: date-time
+          example: "2025-10-01T08:00:00Z"
+        endDate:
+          type: string
+          format: date-time
+          example: "2025-10-01T20:00:00Z"
+        status:
+          $ref: '#/components/schemas/ElectionStatus'
+        optionsCount:
+          type: integer
+          example: 3
+
+    ElectionOptionResponse:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "7ed9c6f5-85ef-4677-beb5-3c31cc91c205"
+        name:
+          type: string
+          example: Jan Kowalski
+        description:
+          type: string
+          example: Kandydat niezależny.
+
+    ElectionResultsSummaryResponse:
+      type: object
+      required:
+        - totalVotes
+        - items
+      properties:
+        totalVotes:
+          type: integer
+          format: int64
+          example: 1200
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ElectionOptionResultResponse'
+
+    ElectionOptionResultResponse:
+      type: object
+      required:
+        - optionId
+        - optionName
+        - votesCount
+        - percentage
+      properties:
+        optionId:
+          type: string
+          format: uuid
+          example: "7ed9c6f5-85ef-4677-beb5-3c31cc91c205"
+        optionName:
+          type: string
+          example: Jan Kowalski
+        votesCount:
+          type: integer
+          format: int64
+          example: 720
+        percentage:
+          type: number
+          format: double
+          example: 60.0
+
+    VoteRequest:
+      type: object
+      required:
+        - voterId
+        - optionId
+      properties:
+        voterId:
+          type: string
+          format: uuid
+          description: Voter technical identifier.
+          example: "0f7f3f6e-6d4c-4f31-9c4b-41e7087fbb21"
+        optionId:
+          type: string
+          format: uuid
+          description: Selected election option identifier.
+          example: "7ed9c6f5-85ef-4677-beb5-3c31cc91c205"
+
+    VoteResponse:
+      type: object
+      required:
+        - id
+        - electionId
+        - voterId
+        - optionId
+        - votedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "b4d84e35-cc38-4a45-a9c4-6f13bb0a420e"
+        electionId:
+          type: string
+          format: uuid
+          example: "7a9737df-bb71-4a6f-8b3c-75f8e761fd32"
+        voterId:
+          type: string
+          format: uuid
+          example: "0f7f3f6e-6d4c-4f31-9c4b-41e7087fbb21"
+        optionId:
+          type: string
+          format: uuid
+          example: "7ed9c6f5-85ef-4677-beb5-3c31cc91c205"
+        votedAt:
+          type: string
+          format: date-time
+          example: "2025-10-01T12:15:30Z"
+
     ErrorModel:
       type: object
       properties:
         error:
           type: string
-          example: "BAD_REQUEST"
+          example: "INTERNAL_ERROR"
         message:
           type: string
-          example: "Request has wrong field"
+          example: "Unpredicted error"
       required:
         - error
         - message
 
+    BadRequestErrorModel:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            - BAD_REQUEST
+        message:
+          type: string
+          example: "Field X cannot be null."
+      required:
+        - error
+        - message
+
+    VoterAlreadyExistsErrorModel:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            - VOTER_ALREADY_EXISTS
+        message:
+          type: string
+          example: "Voter with requested pesel already exists"
+      required:
+        - error
+        - message
+
+    VoterTooYoungErrorModel:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            - VOTER_TOO_YOUNG
+        message:
+          type: string
+          example: "Voter has to be at least 18 years old"
+      required:
+        - error
+        - message
+
+    VoterNotFoundErrorModel:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            - VOTER_NOT_FOUND
+        message:
+          type: string
+          example: "Voter with ID xyz not found"
+      required:
+        - error
+        - message
+
+    ElectionAlreadyStartedErrorModel:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            - ELECTION_ALREADY_STARTED
+        message:
+          type: string
+          example: "Election already started"
+      required:
+        - error
+        - message
+
+    ElectionNotFoundErrorModel:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            - ELECTION_NOT_FOUND
+        message:
+          type: string
+          example: "Election with ID xyz not found"
+      required:
+        - error
+        - message
+
+    VoteAlreadyExistsErrorModel:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            - VOTE_ALREADY_EXISTS
+        message:
+          type: string
+          example: "Voter has already voted in this election."
+      required:
+        - error
+        - message
+
+    VoteResourceNotFoundErrorModel:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            - ELECTION_NOT_FOUND
+            - VOTER_NOT_FOUND
+            - ELECTION_OPTION_NOT_FOUND
+        message:
+          type: string
+          example: "Requested voting resource was not found."
+      required:
+        - error
+        - message
   responses:
+    VoterResponse:
+      description: "Voter model response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/VoterResponse"
+
+    VotersListResponse:
+      description: Voters list response
+      headers:
+        Total-Size:
+          description: Total number of voters matching current filters.
+          schema:
+            type: integer
+            format: int64
+            example: 125
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/VoterListItemResponse'
+
+    ElectionResponse:
+      description: "Election model response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ElectionResponse"
+
+    ElectionsListResponse:
+      description: Elections list response
+      headers:
+        Total-Size:
+          description: Total number of elections matching current filters.
+          schema:
+            type: integer
+            format: int64
+            example: 25
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ElectionListItemResponse'
+
+    VoteResponse:
+      description: "Vote response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/VoteResponse"
+
     ErrorResponse:
       description: "Error response"
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorModel"
+
+    BadRequestErrorResponse:
+      description: "Bad request error response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BadRequestErrorModel"
+
+    VoterAlreadyExistsErrorResponse:
+      description: "Voter already exists error response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/VoterAlreadyExistsErrorModel"
+
+    VoterTooYoungErrorResponse:
+      description: "Voter too young error response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/VoterTooYoungErrorModel"
+
+    VoterNotFoundErrorResponse:
+      description: "Voter not found error response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/VoterNotFoundErrorModel"
+
+    ElectionAlreadyStartedErrorResponse:
+      description: "Election validation error response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ElectionAlreadyStartedErrorModel"
+
+    ElectionNotFoundErrorResponse:
+      description: "Election not found error response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ElectionNotFoundErrorModel"
+
+    VoteAlreadyExistsErrorResponse:
+      description: "Vote already exists error response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/VoteAlreadyExistsErrorModel"
+
+    VoteResourceNotFoundErrorResponse:
+      description: "Vote resource not found error response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/VoteResourceNotFoundErrorModel"
