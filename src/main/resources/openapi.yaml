@@ -355,7 +355,7 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
 
-  /api/v1/elections/{id}/votes:
+  /api/v1/elections/{id}/vote:
     post:
       tags:
         - Votes

@@ -1,6 +1,5 @@
 package pl.tomaszlink.electionapplication.voters.managers;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -9,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import pl.tomaszlink.electionapplication.voters.entities.VoterEntity;
 import pl.tomaszlink.electionapplication.voters.exceptions.VoterAlreadyExistsException;
 import pl.tomaszlink.electionapplication.voters.exceptions.VoterNotFoundException;

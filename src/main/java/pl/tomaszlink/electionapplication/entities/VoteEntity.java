@@ -1,6 +1,7 @@
 package pl.tomaszlink.electionapplication.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import pl.tomaszlink.electionapplication.elections.entities.ElectionEntity;
 import pl.tomaszlink.electionapplication.elections.entities.ElectionOptionEntity;
 import pl.tomaszlink.electionapplication.voters.entities.VoterEntity;
@@ -9,9 +10,8 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(
-        name = "votes"
-)
+@Table(name = "votes")
+@Getter
 public class VoteEntity {
 
     @Id

@@ -3,15 +3,17 @@ package pl.tomaszlink.electionapplication.elections.converters;
 import jakarta.validation.constraints.NotNull;
 import pl.tomaszlink.electionapplication.elections.entities.ElectionEntity;
 import pl.tomaszlink.electionapplication.elections.entities.ElectionOptionEntity;
-import pl.tomaszlink.electionapplication.model.ElectionListItemResponse;
-import pl.tomaszlink.electionapplication.model.ElectionOptionResponse;
-import pl.tomaszlink.electionapplication.model.ElectionResponse;
-import pl.tomaszlink.electionapplication.model.ElectionStatus;
+import pl.tomaszlink.electionapplication.model.*;
 
 import java.time.OffsetDateTime;
 
 public class ElectionConverter {
     private ElectionConverter(){}
+
+    public static ElectionResponse toElectionResponse(@NotNull ElectionEntity electionEntity, ElectionResultsSummaryResponse results){
+        return toElectionResponse(electionEntity)
+                .results(results);
+    }
 
     public static ElectionResponse toElectionResponse(@NotNull ElectionEntity electionEntity){
         return new ElectionResponse()
@@ -20,7 +22,7 @@ public class ElectionConverter {
                 .description(electionEntity.getDescription())
                 .startDate(electionEntity.getStartDate())
                 .endDate(electionEntity.getEndDate())
-                .status(calculateStatus(electionEntity.getStartDate(), electionEntity.getEndDate()))
+                .status(convertElectionStatus(electionEntity.getStatus()))
                 .options(electionEntity.getOptions().stream()
                         .map(option -> new ElectionOptionResponse()
                                 .id(option.getId())
@@ -37,7 +39,7 @@ public class ElectionConverter {
                 .name(electionEntity.getName())
                 .startDate(electionEntity.getStartDate())
                 .endDate(electionEntity.getEndDate())
-                .status(calculateStatus(electionEntity.getStartDate(), electionEntity.getEndDate()))
+                .status(convertElectionStatus(electionEntity.getStatus()))
                 .optionsCount(electionEntity.getOptionsSize());
     }
 
@@ -48,17 +50,11 @@ public class ElectionConverter {
                 .description(electionOptionEntity.getDescription());
     }
 
-    private static ElectionStatus calculateStatus(@NotNull OffsetDateTime startDate, @NotNull OffsetDateTime endDate){
-        OffsetDateTime now = OffsetDateTime.now();
-
-        if(now.isBefore(startDate)){
-            return ElectionStatus.DRAFT;
-        }
-
-        if(now.isBefore(endDate)){
-            return ElectionStatus.ACTIVE;
-        }
-
-        return ElectionStatus.FINISHED;
+    private static ElectionStatus convertElectionStatus(pl.tomaszlink.electionapplication.elections.entities.ElectionStatus electionStatus){
+        return switch (electionStatus){
+            case DRAFT -> ElectionStatus.DRAFT;
+            case ACTIVE -> ElectionStatus.ACTIVE;
+            case FINISHED -> ElectionStatus.FINISHED;
+        };
     }
 }

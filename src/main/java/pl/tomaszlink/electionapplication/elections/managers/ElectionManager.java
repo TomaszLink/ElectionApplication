@@ -1,6 +1,5 @@
 package pl.tomaszlink.electionapplication.elections.managers;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -8,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import pl.tomaszlink.electionapplication.elections.exceptions.ElectionAlreadyStartedException;
 import pl.tomaszlink.electionapplication.elections.exceptions.ElectionNotFoundException;
 import pl.tomaszlink.electionapplication.elections.helpers.ElectionSpecificationHelper;

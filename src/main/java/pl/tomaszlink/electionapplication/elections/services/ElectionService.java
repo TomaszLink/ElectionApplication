@@ -11,6 +11,7 @@ import pl.tomaszlink.electionapplication.elections.models.ElectionUpdateCommand;
 import pl.tomaszlink.electionapplication.elections.entities.ElectionEntity;
 import pl.tomaszlink.electionapplication.elections.entities.ElectionOptionEntity;
 import pl.tomaszlink.electionapplication.model.*;
+import pl.tomaszlink.electionapplication.votes.managers.ElectionResultsManager;
 
 import java.util.List;
 import java.util.UUID;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ElectionService {
     private final ElectionManager electionManager;
+    private final ElectionResultsManager electionResultsManager;
 
     public ElectionResponse createElection(@NotNull CreateElectionRequest createElectionRequest) {
         ElectionEntity electionEntity = ElectionEntity.create(
@@ -43,7 +45,8 @@ public class ElectionService {
 
     public ElectionResponse getElection(@NotNull UUID id) {
         return ElectionConverter.toElectionResponse(
-                this.electionManager.findById(id)
+                this.electionManager.findById(id),
+                this.electionResultsManager.getElectionResults(id)
         );
     }
 

@@ -125,4 +125,18 @@ public class ElectionEntity {
     public void markAsChanged() {
         this.updatedAt = OffsetDateTime.now();
     }
+
+    public ElectionStatus getStatus(){
+        OffsetDateTime now = OffsetDateTime.now();
+
+        if(now.isBefore(startDate)){
+            return ElectionStatus.DRAFT;
+        }
+
+        if(now.isBefore(endDate)){
+            return ElectionStatus.ACTIVE;
+        }
+
+        return ElectionStatus.FINISHED;
+    }
 }
