@@ -12,11 +12,29 @@ import pl.tomaszlink.electionapplication.votes.controllers.VoteController;
 public class VoteExceptionHandler {
 
     @ExceptionHandler(VoteInElectionAlreadyExistsException.class)
-    public ResponseEntity<VoteAlreadyExistsErrorModel> handle(VoteInElectionAlreadyExistsException ex) {
+    public ResponseEntity<VoteConflictErrorModel> handle(VoteInElectionAlreadyExistsException ex) {
         return ResponseEntity
                 .status(409)
-                .body(new VoteAlreadyExistsErrorModel()
-                        .error(VoteAlreadyExistsErrorModel.ErrorEnum.VOTE_ALREADY_EXISTS)
+                .body(new VoteConflictErrorModel()
+                        .error(VoteConflictErrorModel.ErrorEnum.VOTE_ALREADY_EXISTS)
+                        .message(ex.getMessage()));
+    }
+
+    @ExceptionHandler(ElectionIsNotActiveException.class)
+    public ResponseEntity<VoteConflictErrorModel> handle(ElectionIsNotActiveException ex) {
+        return ResponseEntity
+                .status(409)
+                .body(new VoteConflictErrorModel()
+                        .error(VoteConflictErrorModel.ErrorEnum.ELECTION_NOT_ACTIVE)
+                        .message(ex.getMessage()));
+    }
+
+    @ExceptionHandler(VoterBlockedException.class)
+    public ResponseEntity<VoterBlockedErrorModel> handle(VoterBlockedException ex) {
+        return ResponseEntity
+                .status(422)
+                .body(new VoterBlockedErrorModel()
+                        .error(VoterBlockedErrorModel.ErrorEnum.VOTER_BLOCKED)
                         .message(ex.getMessage()));
     }
 

@@ -385,7 +385,9 @@ paths:
         '404':
           $ref: '#/components/responses/VoteResourceNotFoundErrorResponse'
         '409':
-          $ref: '#/components/responses/VoteAlreadyExistsErrorResponse'
+          $ref: '#/components/responses/VoteConflictErrorResponse'
+        '422':
+          $ref: '#/components/responses/VoterBlockedErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
 
@@ -853,6 +855,20 @@ components:
         - error
         - message
 
+    VoterBlockedErrorModel:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            - VOTER_BLOCKED
+        message:
+          type: string
+          example: "Voter with ID xyz is blocked"
+      required:
+        - error
+        - message
+
     ElectionAlreadyStartedErrorModel:
       type: object
       properties:
@@ -881,13 +897,14 @@ components:
         - error
         - message
 
-    VoteAlreadyExistsErrorModel:
+    VoteConflictErrorModel:
       type: object
       properties:
         error:
           type: string
           enum:
             - VOTE_ALREADY_EXISTS
+            - ELECTION_NOT_ACTIVE
         message:
           type: string
           example: "Voter has already voted in this election."
@@ -999,6 +1016,13 @@ components:
           schema:
             $ref: "#/components/schemas/VoterNotFoundErrorModel"
 
+    VoterBlockedErrorResponse:
+      description: "Voter not found error response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/VoterBlockedErrorModel"
+
     ElectionAlreadyStartedErrorResponse:
       description: "Election validation error response"
       content:
@@ -1013,12 +1037,12 @@ components:
           schema:
             $ref: "#/components/schemas/ElectionNotFoundErrorModel"
 
-    VoteAlreadyExistsErrorResponse:
+    VoteConflictErrorResponse:
       description: "Vote already exists error response"
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/VoteAlreadyExistsErrorModel"
+            $ref: "#/components/schemas/VoteConflictErrorModel"
 
     VoteResourceNotFoundErrorResponse:
       description: "Vote resource not found error response"

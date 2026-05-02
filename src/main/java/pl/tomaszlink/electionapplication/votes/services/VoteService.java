@@ -14,6 +14,7 @@ import pl.tomaszlink.electionapplication.voters.managers.VoterManager;
 import pl.tomaszlink.electionapplication.votes.converters.VoteConverter;
 import pl.tomaszlink.electionapplication.votes.exceptions.ElectionIsNotActiveException;
 import pl.tomaszlink.electionapplication.votes.exceptions.ElectionOptionNotFoundException;
+import pl.tomaszlink.electionapplication.votes.exceptions.VoterBlockedException;
 import pl.tomaszlink.electionapplication.votes.managers.VoteManager;
 
 import java.util.UUID;
@@ -33,6 +34,10 @@ public class VoteService {
         }
 
         VoterEntity voterEntity = this.voterManager.findById(voteRequest.getVoterId());
+
+        if(voterEntity.isBlocked()){
+            throw new VoterBlockedException(String.format("Voter with id %s is blocked.", voterEntity.getId()));
+        }
 
         ElectionOptionEntity electionOptionEntity = electionEntity.getOptions().stream()
                 .filter(option -> option.getId().equals(voteRequest.getOptionId()))
