@@ -13,3 +13,6 @@ constraints:
 vote:
   constraints:
     vote-per-election-unique: votes_unique_voter_per_election
+
+server:
+  port: 8082
