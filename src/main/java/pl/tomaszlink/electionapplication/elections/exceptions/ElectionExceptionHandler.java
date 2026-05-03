@@ -1,12 +1,10 @@
 package pl.tomaszlink.electionapplication.elections.exceptions;
 
-import jakarta.validation.ConstraintViolationException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import pl.tomaszlink.electionapplication.elections.controllers.ElectionController;
-import pl.tomaszlink.electionapplication.model.BadRequestErrorModel;
 import pl.tomaszlink.electionapplication.model.ElectionAlreadyStartedErrorModel;
 import pl.tomaszlink.electionapplication.model.ElectionNotFoundErrorModel;
 

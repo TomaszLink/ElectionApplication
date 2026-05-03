@@ -38,7 +38,7 @@ public class VoteService {
         }
 
         ElectionOptionEntity electionOptionEntity = electionEntity.getOptions().stream()
-                .filter(option -> option.getId().equals(command.electionId()))
+                .filter(option -> option.getId().equals(command.optionId()))
                 .findFirst()
                 .orElseThrow(() -> new ElectionOptionNotFoundException(String.format("Election option with id %s not found in election with id %s.", command.optionId(), command.electionId())));
 
