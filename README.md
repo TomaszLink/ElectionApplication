@@ -1,3 +1,11 @@
+# Technologie
+- Java 21
+- Spring Boot 4.0.6
+- Hibernate
+- PostgreSQL
+- OpenAPI / Swagger UI
+- Gradle
+
 # Założenia biznesowe
 
 1. Wybory są aktywne w okresie pomiędzy `startDate` oraz `endDate`.
