@@ -78,7 +78,7 @@ public class VoterManager {
     public VoterEntity updateVoterBlockStatus(@NotNull UpdateVoterBlockStatusCommand command){
         VoterEntity voterEntity = this.findById(command.id());
         voterEntity.updateBlockStatus(command.blocked());
-        return this.voterRepository.save(voterEntity);
+        return this.voterRepository.saveAndFlush(voterEntity);
     }
 
     private VoterEntity saveWithPeselUniqueCheck(@NotNull VoterEntity voterEntity){

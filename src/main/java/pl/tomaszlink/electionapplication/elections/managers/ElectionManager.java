@@ -83,7 +83,7 @@ public class ElectionManager {
 
         electionEntity.markAsChanged();
 
-        return this.electionRepository.save(electionEntity);
+        return electionEntity;
     }
 
 }
