@@ -1,6 +1,7 @@
 package pl.tomaszlink.electionapplication.voters.exceptions;
 
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,10 +12,12 @@ import pl.tomaszlink.electionapplication.model.VoterTooYoungErrorModel;
 import pl.tomaszlink.electionapplication.voters.controllers.VoterController;
 
 @RestControllerAdvice(assignableTypes = VoterController.class)
-public class CustomExceptionHandler {
+@Log4j2
+public class VoterExceptionHandler {
 
     @ExceptionHandler(VoterAlreadyExistsException.class)
     public ResponseEntity<VoterAlreadyExistsErrorModel> handle(VoterAlreadyExistsException ex) {
+        log.warn(ex.getMessage());
         return ResponseEntity
                 .status(409)
                 .body(new VoterAlreadyExistsErrorModel()
@@ -24,6 +27,7 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(VoterNotFoundException.class)
     public ResponseEntity<VoterNotFoundErrorModel> handle(VoterNotFoundException ex) {
+        log.warn(ex.getMessage());
         return ResponseEntity
                 .status(404)
                 .body(new VoterNotFoundErrorModel()
@@ -33,19 +37,11 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(VoterTooYoungException.class)
     public ResponseEntity<VoterTooYoungErrorModel> handle(VoterTooYoungException ex) {
+        log.warn(ex.getMessage());
         return ResponseEntity
                 .status(422)
                 .body(new VoterTooYoungErrorModel()
                         .error(VoterTooYoungErrorModel.ErrorEnum.VOTER_TOO_YOUNG)
                         .message(ex.getMessage()));
-    }
-
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<BadRequestErrorModel> handle(ConstraintViolationException e) {
-        return ResponseEntity
-                .status(400)
-                .body(new BadRequestErrorModel()
-                        .error(BadRequestErrorModel.ErrorEnum.BAD_REQUEST)
-                        .message(e.getMessage()));
     }
 }

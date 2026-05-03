@@ -1,6 +1,7 @@
 package pl.tomaszlink.electionapplication.elections.exceptions;
 
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -10,10 +11,12 @@ import pl.tomaszlink.electionapplication.model.ElectionAlreadyStartedErrorModel;
 import pl.tomaszlink.electionapplication.model.ElectionNotFoundErrorModel;
 
 @RestControllerAdvice(assignableTypes = ElectionController.class)
+@Log4j2
 public class ElectionExceptionHandler {
 
     @ExceptionHandler(ElectionNotFoundException.class)
     public ResponseEntity<ElectionNotFoundErrorModel> handle(ElectionNotFoundException ex) {
+        log.warn(ex.getMessage());
         return ResponseEntity
                 .status(404)
                 .body(new ElectionNotFoundErrorModel()
@@ -23,6 +26,7 @@ public class ElectionExceptionHandler {
 
     @ExceptionHandler(ElectionAlreadyStartedException.class)
     public ResponseEntity<ElectionAlreadyStartedErrorModel> handle(ElectionAlreadyStartedException ex) {
+        log.warn(ex.getMessage());
         return ResponseEntity
                 .status(422)
                 .body(new ElectionAlreadyStartedErrorModel()
@@ -30,12 +34,4 @@ public class ElectionExceptionHandler {
                         .message(ex.getMessage()));
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<BadRequestErrorModel> handle(ConstraintViolationException e) {
-        return ResponseEntity
-                .status(400)
-                .body(new BadRequestErrorModel()
-                        .error(BadRequestErrorModel.ErrorEnum.BAD_REQUEST)
-                        .message(e.getMessage()));
-    }
 }

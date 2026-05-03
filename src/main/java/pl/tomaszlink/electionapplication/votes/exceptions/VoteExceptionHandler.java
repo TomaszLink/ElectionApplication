@@ -1,5 +1,6 @@
 package pl.tomaszlink.electionapplication.votes.exceptions;
 
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -9,10 +10,12 @@ import pl.tomaszlink.electionapplication.voters.exceptions.VoterNotFoundExceptio
 import pl.tomaszlink.electionapplication.votes.controllers.VoteController;
 
 @RestControllerAdvice(assignableTypes = VoteController.class)
+@Log4j2
 public class VoteExceptionHandler {
 
     @ExceptionHandler(VoteInElectionAlreadyExistsException.class)
     public ResponseEntity<VoteConflictErrorModel> handle(VoteInElectionAlreadyExistsException ex) {
+        log.warn(ex.getMessage());
         return ResponseEntity
                 .status(409)
                 .body(new VoteConflictErrorModel()
@@ -22,6 +25,7 @@ public class VoteExceptionHandler {
 
     @ExceptionHandler(ElectionIsNotActiveException.class)
     public ResponseEntity<VoteConflictErrorModel> handle(ElectionIsNotActiveException ex) {
+        log.warn(ex.getMessage());
         return ResponseEntity
                 .status(409)
                 .body(new VoteConflictErrorModel()
@@ -31,6 +35,7 @@ public class VoteExceptionHandler {
 
     @ExceptionHandler(VoterBlockedException.class)
     public ResponseEntity<VoterBlockedErrorModel> handle(VoterBlockedException ex) {
+        log.warn(ex.getMessage());
         return ResponseEntity
                 .status(422)
                 .body(new VoterBlockedErrorModel()
@@ -44,6 +49,7 @@ public class VoteExceptionHandler {
             ElectionOptionNotFoundException.class
     })
     public ResponseEntity<VoteResourceNotFoundErrorModel> handle(Exception ex) {
+        log.warn(ex.getMessage());
         VoteResourceNotFoundErrorModel.ErrorEnum errorEnum = switch (ex) {
             case VoterNotFoundException e ->
                     VoteResourceNotFoundErrorModel.ErrorEnum.VOTER_NOT_FOUND;
