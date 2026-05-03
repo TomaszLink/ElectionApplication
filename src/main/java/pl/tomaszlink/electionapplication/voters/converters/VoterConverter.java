@@ -1,4 +1,4 @@
-package pl.tomaszlink.electionapplication.voters.mappers;
+package pl.tomaszlink.electionapplication.voters.converters;
 
 import pl.tomaszlink.electionapplication.model.VoterListItemResponse;
 import pl.tomaszlink.electionapplication.model.VoterResponse;

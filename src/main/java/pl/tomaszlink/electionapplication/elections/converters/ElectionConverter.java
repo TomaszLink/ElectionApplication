@@ -3,16 +3,16 @@ package pl.tomaszlink.electionapplication.elections.converters;
 import jakarta.validation.constraints.NotNull;
 import pl.tomaszlink.electionapplication.elections.entities.ElectionEntity;
 import pl.tomaszlink.electionapplication.elections.entities.ElectionOptionEntity;
+import pl.tomaszlink.electionapplication.elections.models.ElectionWithResults;
 import pl.tomaszlink.electionapplication.model.*;
-
-import java.time.OffsetDateTime;
+import pl.tomaszlink.electionapplication.results.models.ElectionResultsSummary;
 
 public class ElectionConverter {
     private ElectionConverter(){}
 
-    public static ElectionResponse toElectionResponse(@NotNull ElectionEntity electionEntity, ElectionResultsSummaryResponse results){
-        return toElectionResponse(electionEntity)
-                .results(results);
+    public static ElectionResponse toElectionResponse(@NotNull ElectionWithResults electionWithResults){
+        return toElectionResponse(electionWithResults.electionEntity())
+                .results(toElectionResultsSummaryResponse(electionWithResults.resultsSummary()));
     }
 
     public static ElectionResponse toElectionResponse(@NotNull ElectionEntity electionEntity){
@@ -24,11 +24,7 @@ public class ElectionConverter {
                 .endDate(electionEntity.getEndDate())
                 .status(convertElectionStatus(electionEntity.getStatus()))
                 .options(electionEntity.getOptions().stream()
-                        .map(option -> new ElectionOptionResponse()
-                                .id(option.getId())
-                                .name(option.getName())
-                                .description(option.getDescription())
-                        )
+                        .map(ElectionConverter::toElectionOptionResponse)
                         .toList()
                 );
     }
@@ -43,6 +39,24 @@ public class ElectionConverter {
                 .optionsCount(electionEntity.getOptionsSize());
     }
 
+    private static ElectionResultsSummaryResponse toElectionResultsSummaryResponse(ElectionResultsSummary electionResultsSummary){
+        if(electionResultsSummary == null){
+            return null;
+        }
+        return new ElectionResultsSummaryResponse(
+                electionResultsSummary.votesTotalCount(),
+                electionResultsSummary.optionResults()
+                        .stream()
+                        .map(electionOptionResult -> new ElectionOptionResultResponse(
+                                electionOptionResult.optionId(),
+                                electionOptionResult.optionName(),
+                                electionOptionResult.votesCount(),
+                                electionOptionResult.percentage()
+                        ))
+                        .toList()
+        );
+    }
+
     private static ElectionOptionResponse toElectionOptionResponse(@NotNull ElectionOptionEntity electionOptionEntity){
         return new ElectionOptionResponse()
                 .id(electionOptionEntity.getId())
@@ -50,7 +64,7 @@ public class ElectionConverter {
                 .description(electionOptionEntity.getDescription());
     }
 
-    private static ElectionStatus convertElectionStatus(pl.tomaszlink.electionapplication.elections.entities.ElectionStatus electionStatus){
+    private static ElectionStatus convertElectionStatus(pl.tomaszlink.electionapplication.elections.models.ElectionStatus electionStatus){
         return switch (electionStatus){
             case DRAFT -> ElectionStatus.DRAFT;
             case ACTIVE -> ElectionStatus.ACTIVE;

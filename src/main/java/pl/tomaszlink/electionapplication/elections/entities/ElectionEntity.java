@@ -3,7 +3,8 @@ package pl.tomaszlink.electionapplication.elections.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import pl.tomaszlink.electionapplication.elections.models.ElectionOptionUpdateCommand;
+import pl.tomaszlink.electionapplication.elections.commands.ElectionOptionUpdateCommand;
+import pl.tomaszlink.electionapplication.elections.models.ElectionStatus;
 
 import java.time.OffsetDateTime;
 import java.util.*;

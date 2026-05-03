@@ -4,14 +4,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import pl.tomaszlink.electionapplication.model.*;
+import pl.tomaszlink.electionapplication.voters.commands.RegisterVoterCommand;
+import pl.tomaszlink.electionapplication.voters.commands.UpdateVoterBlockStatusCommand;
 import pl.tomaszlink.electionapplication.voters.entities.VoterEntity;
-import pl.tomaszlink.electionapplication.voters.exceptions.VoterTooYoungException;
 import pl.tomaszlink.electionapplication.voters.helpers.AdultPolicyHelper;
-import pl.tomaszlink.electionapplication.voters.helpers.PeselHelper;
 import pl.tomaszlink.electionapplication.voters.managers.VoterManager;
-import pl.tomaszlink.electionapplication.voters.mappers.VoterConverter;
-import pl.tomaszlink.electionapplication.voters.models.UpdateVoterCommand;
+import pl.tomaszlink.electionapplication.voters.commands.UpdateVoterCommand;
 
 import java.util.UUID;
 
@@ -21,54 +19,27 @@ public class VoterService {
     private final VoterManager voterManager;
     private final AdultPolicyHelper adultPolicyHelper;
 
-    public VoterResponse getVoter(@NotNull UUID id) {
-        return VoterConverter.toVoterResponse(
-                this.voterManager.findById(id)
-        );
+    public VoterEntity getVoter(@NotNull UUID id) {
+        return this.voterManager.findById(id);
     }
 
-    public Page<VoterListItemResponse> getVoters(@NotNull Integer page, @NotNull Integer size, String search, Boolean blockedFilter, String sortBy, String sortDirection) {
-        return this.voterManager.getVotersPage(page, size, search, blockedFilter, sortBy, sortDirection)
-                .map(VoterConverter::toVoterListItemResponse);
+    public Page<VoterEntity> getVoters(@NotNull Integer page, @NotNull Integer size, String search, Boolean blockedFilter, String sortBy, String sortDirection) {
+        return this.voterManager.getVotersPage(page, size, search, blockedFilter, sortBy, sortDirection);
     }
 
-    public VoterResponse registerVoter(@NotNull RegisterVoterRequest registerVoterRequest) {
-        VoterEntity voterEntity = VoterEntity.create(
-                registerVoterRequest.getFirstName(),
-                registerVoterRequest.getLastName(),
-                registerVoterRequest.getPesel(),
-                PeselHelper.extractBirthDateFromPesel(registerVoterRequest.getPesel())
-        );
+    public VoterEntity registerVoter(@NotNull RegisterVoterCommand command) {
+        this.adultPolicyHelper.checkAgeMajority(command.birthDate());
 
-        if(!this.adultPolicyHelper.isAdult(voterEntity.getBirthDate())){
-            throw new VoterTooYoungException();
-        }
-
-        return VoterConverter.toVoterResponse(
-                this.voterManager.saveNewVoter(voterEntity)
-        );
+        return this.voterManager.saveNewVoter(command);
     }
 
-    public VoterResponse updateVoter(@NotNull UUID id, @NotNull UpdateVoterRequest updateVoterRequest) {
-        UpdateVoterCommand updateVoterCommand = new UpdateVoterCommand(
-                updateVoterRequest.getFirstName(),
-                updateVoterRequest.getLastName(),
-                updateVoterRequest.getPesel(),
-                PeselHelper.extractBirthDateFromPesel(updateVoterRequest.getPesel())
-        );
+    public VoterEntity updateVoter(@NotNull UpdateVoterCommand command) {
+        this.adultPolicyHelper.checkAgeMajority(command.birthDate());
 
-        if(!this.adultPolicyHelper.isAdult(updateVoterCommand.birthDate())){
-            throw new VoterTooYoungException();
-        }
-
-        return VoterConverter.toVoterResponse(
-                this.voterManager.updateVoter(id, updateVoterCommand)
-        );
+        return this.voterManager.updateVoter(command);
     }
 
-    public VoterResponse updateVoterBlockStatus(UUID id, UpdateVoterBlockStatusRequest updateVoterBlockStatusRequest) {
-        return VoterConverter.toVoterResponse(
-                this.voterManager.updateVoterBlockStatus(id, updateVoterBlockStatusRequest.getBlocked())
-        );
+    public VoterEntity updateVoterBlockStatus(@NotNull UpdateVoterBlockStatusCommand command) {
+        return this.voterManager.updateVoterBlockStatus(command);
     }
 }

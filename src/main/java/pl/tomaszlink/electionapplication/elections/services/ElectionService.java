@@ -4,16 +4,15 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import pl.tomaszlink.electionapplication.elections.converters.ElectionConverter;
+import pl.tomaszlink.electionapplication.elections.commands.ElectionCreateCommand;
+import pl.tomaszlink.electionapplication.elections.models.ElectionStatus;
 import pl.tomaszlink.electionapplication.elections.managers.ElectionManager;
-import pl.tomaszlink.electionapplication.elections.models.ElectionOptionUpdateCommand;
-import pl.tomaszlink.electionapplication.elections.models.ElectionUpdateCommand;
+import pl.tomaszlink.electionapplication.elections.commands.ElectionUpdateCommand;
 import pl.tomaszlink.electionapplication.elections.entities.ElectionEntity;
-import pl.tomaszlink.electionapplication.elections.entities.ElectionOptionEntity;
-import pl.tomaszlink.electionapplication.model.*;
-import pl.tomaszlink.electionapplication.votes.managers.ElectionResultsManager;
+import pl.tomaszlink.electionapplication.elections.models.ElectionWithResults;
+import pl.tomaszlink.electionapplication.results.managers.ElectionResultsManager;
+import pl.tomaszlink.electionapplication.results.models.ElectionResultsSummary;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -22,56 +21,26 @@ public class ElectionService {
     private final ElectionManager electionManager;
     private final ElectionResultsManager electionResultsManager;
 
-    public ElectionResponse createElection(@NotNull CreateElectionRequest createElectionRequest) {
-        ElectionEntity electionEntity = ElectionEntity.create(
-                createElectionRequest.getName(),
-                createElectionRequest.getDescription(),
-                createElectionRequest.getStartDate(),
-                createElectionRequest.getEndDate(),
-                createElectionRequest.getOptions().size()
-        );
+    public ElectionEntity createElection(@NotNull ElectionCreateCommand command) {
+        return this.electionManager.saveNewElection(command);
+    }
 
-        createElectionRequest.getOptions()
-                .forEach(option -> ElectionOptionEntity.create(
-                        option.getName(),
-                        option.getDescription(),
-                        electionEntity
-                ));
+    public ElectionWithResults getElection(@NotNull UUID id) {
+        ElectionEntity electionEntity = this.electionManager.findById(id);
+        ElectionResultsSummary resultsSummary = electionEntity.getStatus() != ElectionStatus.DRAFT  ?
+                this.electionResultsManager.getElectionResults(id)  :   null;
 
-        return ElectionConverter.toElectionResponse(
-                this.electionManager.saveNewElection(electionEntity)
+        return new ElectionWithResults(
+                electionEntity,
+                resultsSummary
         );
     }
 
-    public ElectionResponse getElection(@NotNull UUID id) {
-        return ElectionConverter.toElectionResponse(
-                this.electionManager.findById(id),
-                this.electionResultsManager.getElectionResults(id)
-        );
+    public Page<ElectionEntity> getElections(@NotNull Integer page, @NotNull Integer size, String search, ElectionStatus status, String sortBy, String sortDirection) {
+        return this.electionManager.getElectionsPage(page, size, search, status, sortBy, sortDirection);
     }
 
-    public Page<ElectionListItemResponse> getElections(@NotNull Integer page, @NotNull Integer size, String search, ElectionStatus status, String sortBy, String sortDirection) {
-        return this.electionManager.getElectionsPage(page, size, search, status, sortBy, sortDirection)
-                .map(ElectionConverter::toElectionListItemResponse);
-    }
-
-    public ElectionResponse updateElection(@NotNull UUID id, @NotNull UpdateElectionRequest updateElectionRequest) {
-        ElectionUpdateCommand electionUpdateCommand = new ElectionUpdateCommand(
-                updateElectionRequest.getName(),
-                updateElectionRequest.getDescription(),
-                updateElectionRequest.getStartDate(),
-                updateElectionRequest.getEndDate()
-        );
-
-        List<ElectionOptionUpdateCommand> electionOptionUpdateCommands = updateElectionRequest.getOptions()
-                .stream()
-                .map(option -> new ElectionOptionUpdateCommand(
-                        option.getId(),
-                        option.getName(),
-                        option.getDescription())
-                ).toList();
-        return ElectionConverter.toElectionResponse(
-                this.electionManager.updateElection(id, electionUpdateCommand, electionOptionUpdateCommands)
-        );
+    public ElectionEntity updateElection(@NotNull ElectionUpdateCommand command) {
+        return this.electionManager.updateElection(command);
     }
 }

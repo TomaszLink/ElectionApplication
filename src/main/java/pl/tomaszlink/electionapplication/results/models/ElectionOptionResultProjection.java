@@ -1,11 +1,9 @@
-package pl.tomaszlink.electionapplication.votes.models;
+package pl.tomaszlink.electionapplication.results.models;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 public interface ElectionOptionResultProjection {
     UUID getOptionId();
     String getOptionName();
     Long getVotesCount();
-    BigDecimal getPercentage();
 }

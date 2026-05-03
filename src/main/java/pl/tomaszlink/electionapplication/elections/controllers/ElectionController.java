@@ -5,6 +5,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import pl.tomaszlink.electionapplication.api.ElectionsApi;
+import pl.tomaszlink.electionapplication.elections.commands.ElectionCreateCommand;
+import pl.tomaszlink.electionapplication.elections.commands.ElectionUpdateCommand;
+import pl.tomaszlink.electionapplication.elections.converters.ElectionCommandConverter;
+import pl.tomaszlink.electionapplication.elections.converters.ElectionConverter;
+import pl.tomaszlink.electionapplication.elections.entities.ElectionEntity;
+import pl.tomaszlink.electionapplication.elections.models.ElectionWithResults;
 import pl.tomaszlink.electionapplication.elections.services.ElectionService;
 import pl.tomaszlink.electionapplication.model.*;
 
@@ -20,22 +26,28 @@ public class ElectionController implements ElectionsApi {
 
     @Override
     public ResponseEntity<ElectionResponse> createElection(CreateElectionRequest createElectionRequest) {
+        ElectionCreateCommand command = ElectionCommandConverter.toElectionCreateCommand(createElectionRequest);
+        ElectionEntity electionEntity = this.electionService.createElection(command);
+
         return ResponseEntity.status(201)
-                .body(this.electionService.createElection(
-                        createElectionRequest
-                ));
+                .body(ElectionConverter.toElectionResponse(electionEntity));
     }
 
     @Override
     public ResponseEntity<ElectionResponse> getElection(UUID id) {
+        ElectionWithResults electionWithResults = this.electionService.getElection(id);
+
         return ResponseEntity.ok(
-                this.electionService.getElection(id)
+                ElectionConverter.toElectionResponse(electionWithResults)
         );
     }
 
     @Override
     public ResponseEntity<List<ElectionListItemResponse>> getElections(Integer page, Integer size, String search, ElectionStatus status, String sortBy, String sortDirection) {
-        Page<ElectionListItemResponse> electionPage = this.electionService.getElections(page, size, search, status, sortBy, sortDirection);
+        pl.tomaszlink.electionapplication.elections.models.ElectionStatus electionStatus = status == null   ?   null    :   pl.tomaszlink.electionapplication.elections.models.ElectionStatus.valueOf(status.getValue());
+        Page<ElectionListItemResponse> electionPage = this.electionService.getElections(page, size, search, electionStatus, sortBy, sortDirection)
+                .map(ElectionConverter::toElectionListItemResponse);
+
         return ResponseEntity.ok()
                 .header(TOTAL_SIZE_HEADER, String.valueOf(electionPage.getTotalElements()))
                 .body(electionPage.getContent());
@@ -43,8 +55,11 @@ public class ElectionController implements ElectionsApi {
 
     @Override
     public ResponseEntity<ElectionResponse> updateElection(UUID id, UpdateElectionRequest updateElectionRequest) {
+        ElectionUpdateCommand electionUpdateCommand = ElectionCommandConverter.toElectionUpdateCommand(id, updateElectionRequest);
+        ElectionEntity electionEntity = this.electionService.updateElection(electionUpdateCommand);
+
         return ResponseEntity.ok(
-                this.electionService.updateElection(id, updateElectionRequest)
+                ElectionConverter.toElectionResponse(electionEntity)
         );
     }
 }

@@ -1,7 +1,7 @@
 package pl.tomaszlink.electionapplication.votes.converters;
 
 import jakarta.validation.constraints.NotNull;
-import pl.tomaszlink.electionapplication.entities.VoteEntity;
+import pl.tomaszlink.electionapplication.votes.entities.VoteEntity;
 import pl.tomaszlink.electionapplication.model.VoteResponse;
 
 public class VoteConverter {
