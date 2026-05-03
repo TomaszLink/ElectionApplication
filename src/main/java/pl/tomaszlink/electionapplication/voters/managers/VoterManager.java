@@ -17,7 +17,7 @@ import pl.tomaszlink.electionapplication.voters.exceptions.VoterNotFoundExceptio
 import pl.tomaszlink.electionapplication.voters.helpers.PeselHelper;
 import pl.tomaszlink.electionapplication.voters.helpers.VoterSpecificationHelper;
 import pl.tomaszlink.electionapplication.voters.commands.UpdateVoterCommand;
-import pl.tomaszlink.electionapplication.voters.properties.ConstraintsProperties;
+import pl.tomaszlink.electionapplication.voters.properties.VoterConstraintsProperties;
 import pl.tomaszlink.electionapplication.voters.repositories.VoterRepository;
 
 import java.util.UUID;
@@ -26,7 +26,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class VoterManager {
     private final VoterRepository voterRepository;
-    private final ConstraintsProperties constraintsProperties;
+    private final VoterConstraintsProperties constraintsProperties;
 
     @Transactional(readOnly = true)
     public VoterEntity findById(@NotNull UUID id){

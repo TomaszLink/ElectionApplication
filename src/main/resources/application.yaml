@@ -7,12 +7,11 @@ spring:
 voters:
   adulthood:
     threshold-age: 18
-constraints:
-  pesel-unique: uk_voters_pesel
+
+voter:
+  constraints:
+    pesel-unique: uk_voters_pesel
 
 vote:
   constraints:
     vote-per-election-unique: votes_unique_voter_per_election
-
-server:
-  port: 8082
